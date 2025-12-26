@@ -1,45 +1,24 @@
-import React from 'react';
-import Link from 'next/link';
+"use client";
+
+import React, { useRef } from 'react';
 import { cn } from "@/lib/utils";
-import { motion } from 'framer-motion';
-import { Spotlight } from '@/components/ui/spotlight';
-import { RainbowButton } from '@/components/ui/rainbow-button';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowDown, Play, Users, Globe, Award } from 'lucide-react';
 
-// Icon component for contact details
-const InfoIcon = ({ type }: { type: 'website' | 'phone' | 'address' }) => {
-    const icons = {
-        website: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-primary">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" x2="22" y1="12" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-        ),
-        phone: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-primary">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-            </svg>
-        ),
-        address: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-primary">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-        ),
-    };
-    return <div className="mr-2 flex-shrink-0">{icons[type]}</div>;
-};
+// --- Fonts & Global Styles ---
+const FontStyles = () => (
+  <style dangerouslySetInnerHTML={{__html: `
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap');
+    
+    .font-primary { font-family: 'Manrope', sans-serif; }
+    .font-tech { font-family: 'Space Grotesk', sans-serif; }
+  `}} />
+);
 
-
-// Prop types for the HeroSection component
+// --- Types ---
 interface HeroSectionProps {
   className?: string;
-  logo?: {
-    url: string;
-    alt: string;
-    text?: string;
-  };
-  title: React.ReactNode;
+  title: string | React.ReactNode;
   subtitle: string;
   callToAction: {
     text: string;
@@ -53,115 +32,196 @@ interface HeroSectionProps {
   };
 }
 
-const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
-  ({ className, logo, title, subtitle, callToAction, backgroundImage, contactInfo }, ref) => {
-    
-    // Animation variants for the container to orchestrate children animations
-    const containerVariants = {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          staggerChildren: 0.15,
-          delayChildren: 0.2,
-        },
-      },
-    };
+// --- Components ---
 
-    // Animation variants for individual text/UI elements
-    const itemVariants = {
-      hidden: { y: 20, opacity: 0 },
-      visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          duration: 0.5,
-          ease: [0.4, 0, 0.2, 1] as any,
-        },
-      },
-    };
+const GridBackground = () => (
+  <div className="absolute inset-0 z-0 pointer-events-none">
+    {/* Light Mode: Very faint black lines | Dark Mode: Very faint white lines */}
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px)] bg-[size:60px_100%]" />
+    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] dark:bg-[linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:100%_60px]" />
     
-    return (
-      <motion.section
-        ref={ref}
+    {/* Radial Fade to mask edges: White for light mode, Black for dark mode */}
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#ffffff_100%)] dark:bg-[radial-gradient(circle_at_center,transparent_0%,#050505_100%)]" />
+  </div>
+);
+
+const Ticker = ({ text }: { text: string }) => (
+  <div className="overflow-hidden whitespace-nowrap py-3 border-t border-neutral-200 dark:border-white/5 bg-white/80 dark:bg-black/40 backdrop-blur-sm">
+    <motion.div 
+      className="flex min-w-full gap-12"
+      animate={{ x: ["0%", "-50%"] }}
+      transition={{ repeat: Infinity, ease: "linear", duration: 40 }}
+    >
+      {[...Array(6)].map((_, i) => (
+        <span key={i} className="flex items-center gap-3 text-[10px] font-tech uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-600">
+          {text} <span className="h-0.5 w-0.5 rounded-full bg-neutral-400 dark:bg-neutral-700" />
+        </span>
+      ))}
+    </motion.div>
+  </div>
+);
+
+// --- Main Hero ---
+
+const HeroSection = ({
+  className,
+  title = "Digital Reality",
+  subtitle,
+  callToAction,
+  backgroundImage,
+  contactInfo
+}: HeroSectionProps) => {
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
+  
+  // Parallax effects
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.98]);
+
+  return (
+    <section 
+        ref={containerRef}
         className={cn(
-          "relative flex w-full flex-col overflow-hidden bg-white dark:bg-black/[0.96] text-foreground md:flex-row min-h-screen",
-          className
+            // Base styles: Light mode (white/black text) / Dark mode (black/white text)
+            "relative min-h-screen w-full bg-white dark:bg-[#050505] text-neutral-900 dark:text-white font-primary overflow-hidden selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-black pt-20", 
+            className
         )}
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        {/* Grid Background Pattern */}
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 [background-size:40px_40px] select-none",
-            "[background-image:linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)]",
-            "dark:[background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)]",
-          )}
-        />
+    >
+      <FontStyles />
+      <GridBackground />
 
-        {/* Spotlight Effect */}
-        <Spotlight
-          className="-top-40 left-0 md:-top-20 md:left-60"
-          fill="white"
-        />
+      {/* Main Ambient Glow - Adjusted for visibility in both modes */}
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-100 dark:bg-indigo-900/10 rounded-full blur-[80px] pointer-events-none mix-blend-multiply dark:mix-blend-normal opacity-50 dark:opacity-100" />
 
-        {/* Left Side: Content */}
-        <div className="flex w-full flex-col justify-start gap-y-6 p-6 md:w-1/2 md:p-12 lg:w-3/5 lg:p-16 relative z-10 md:mt-20 mt-16">
-            {/* Top Section: Logo & Main Content */}
-            <div>
-
-                <motion.main variants={containerVariants}>
-                    <motion.h1 className="text-4xl font-bold leading-tight bg-opacity-50 bg-gradient-to-b from-gray-900 to-gray-600 dark:from-neutral-50 dark:to-neutral-400 bg-clip-text text-transparent md:text-6xl" variants={itemVariants}>
-                        {title}
-                    </motion.h1>
-          <motion.p className="my-6 md:my-8 max-w-md text-base text-gray-700 dark:text-neutral-300" variants={itemVariants}>
-                        {subtitle}
-                    </motion.p>
-                    <motion.div variants={itemVariants}>
-                        <RainbowButton asChild size="lg" variant="default">
-                            <Link href={callToAction.href}>
-                                {callToAction.text}
-                            </Link>
-                        </RainbowButton>
-                    </motion.div>
-                </motion.main>
-            </div>
-
-            {/* Bottom Section: Footer Info */}
-      <motion.footer className="mt-4 md:mt-12 w-full" variants={itemVariants}>
-                <div className="grid grid-cols-1 gap-6 text-xs text-gray-600 dark:text-neutral-400 sm:grid-cols-3">
-                    <div className="flex items-center">
-                        <InfoIcon type="website" />
-                        <span>{contactInfo.website}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <InfoIcon type="phone" />
-                        <span>{contactInfo.phone}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <InfoIcon type="address" />
-                        <span>{contactInfo.address}</span>
-                    </div>
-                </div>
-            </motion.footer>
-        </div>
-
-        {/* Right Side: Image with Clip Path Animation */}
+      <div className="relative z-10 flex flex-col items-center max-w-[1400px] mx-auto px-6">
+        
+        {/* 1. Typography Stack */}
         <motion.div 
-          className="w-full min-h-[300px] bg-cover bg-center md:w-1/2 md:min-h-full lg:w-2/5 relative z-10"
-          style={{ 
-            backgroundImage: `url(${backgroundImage})`,
-          }}
-          initial={{ clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)' }}
-          animate={{ clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)' }}
-          transition={{ duration: 1.2, ease: "circOut" }}
+            style={{ opacity: textOpacity }}
+            className="flex flex-col items-center text-center max-w-4xl mx-auto mt-8 mb-12 relative"
         >
+            {/* Top Label */}
+            {/* <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mb-6 flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-md"
+            >
+                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-tech uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                    Accepting New Projects
+                </span>
+            </motion.div> */}
+
+            {/* Headline */}
+            <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.95] text-neutral-900 dark:text-white"
+            >
+                {typeof title === 'string' ? title : title}
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="mt-6 max-w-xl text-base sm:text-lg text-neutral-500 dark:text-neutral-400 font-light leading-relaxed"
+            >
+                {subtitle}
+            </motion.p>
+
+            {/* Actions */}
+            <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="mt-8 flex flex-wrap justify-center gap-3 mb-6"
+            >
+                <a 
+                    href={callToAction.href}
+                    className="group relative h-10 px-6 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black text-sm font-semibold flex items-center gap-2 overflow-hidden hover:scale-105 transition-transform shadow-lg shadow-neutral-900/20 dark:shadow-none"
+                >
+                    <span className="relative z-10">{callToAction.text}</span>
+                    <ArrowDown className="relative z-10 w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
+                </a>
+                
+                <button className="h-10 px-6 rounded-full border border-neutral-200 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-900 dark:text-white text-sm font-medium flex items-center gap-2 transition-colors">
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>Explore</span>
+                </button>
+            </motion.div>
         </motion.div>
-      </motion.section>
-    );
-  }
+
+        {/* 2. Visual Monolith (Cinematic Viewport) */}
+        <motion.div 
+            style={{ y: imageY, scale: imageScale }}
+            className="w-full relative z-20 perspective-1000 max-w-[1200px]" 
+        >
+            {/* --- GLOW EFFECT BEHIND IMAGE --- */}
+            {/* 1. Strong Top Center Glow - White/Blue tint depending on mode */}
+            <div className="absolute -top-[100px] left-1/2 -translate-x-1/2 w-[60%] h-[200px] bg-indigo-500/20 dark:bg-white/5 blur-[80px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-normal" />
+            
+            {/* 2. Wider Ambient Hue - Subtle blue for depth */}
+            <div className="absolute -top-[120px] left-1/2 -translate-x-1/2 w-[90%] h-[200px] bg-blue-100/50 dark:bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
+
+            <motion.div
+                initial={{ opacity: 0, rotateX: 15, scale: 0.95 }}
+                animate={{ opacity: 1, rotateX: 0, scale: 1 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
+                className="relative aspect-[2.4/1] w-full overflow-hidden rounded-t-2xl border-x border-t border-neutral-200 dark:border-white/15 bg-neutral-100 dark:bg-neutral-900 shadow-2xl shadow-neutral-200/50 dark:shadow-black/50"
+            >
+                {/* Image */}
+                <img 
+                    src={backgroundImage} 
+                    alt="Hero Visual" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-90 dark:opacity-75"
+                />
+                
+                {/* Overlay Gradient: Fades from solid background at bottom to transparent at top */}
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#050505] dark:via-transparent dark:to-transparent opacity-90 dark:opacity-90" />
+                
+                {/* Top Shine/Rim Light */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-neutral-900/10 dark:via-white/50 to-transparent opacity-50" />
+                
+                {/* UI Elements inside Screen */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
+                     <div className="hidden md:block">
+                        <p className="font-tech text-[10px] text-neutral-500 dark:text-neutral-500 uppercase mb-1">Current Project</p>
+                        <p className="text-lg font-bold text-neutral-900 dark:text-neutral-200">Fintech Ecosystem v4.0</p>
+                     </div>
+                     
+                     <div className="flex gap-3">
+                        <StatsCard icon={Users} label="Users" value="2.4M" />
+                        <StatsCard icon={Award} label="Awards" value="18" />
+                        <StatsCard icon={Globe} label="Reach" value="Global" />
+                     </div>
+                </div>
+            </motion.div>
+        </motion.div>
+
+      </div>
+
+      {/* 3. Footer Ticker */}
+      <div className="absolute bottom-0 left-0 w-full z-30">
+        <Ticker text="Design Engineering — Creative Strategy — Digital Products — Experience Design — " />
+      </div>
+
+    </section>
+  );
+};
+
+// Scaled down stats card
+const StatsCard = ({ icon: Icon, label, value }: { icon: any, label: string, value: string }) => (
+    <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-neutral-200 dark:border-white/5 rounded-lg p-3 min-w-[80px] shadow-sm">
+        <Icon className="w-3.5 h-3.5 text-neutral-500 mb-1.5" />
+        <div className="text-sm font-bold leading-none text-neutral-900 dark:text-neutral-300">{value}</div>
+        <div className="text-[9px] text-neutral-500 uppercase font-tech mt-1">{label}</div>
+    </div>
 );
 
 HeroSection.displayName = "HeroSection";

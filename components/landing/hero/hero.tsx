@@ -6,11 +6,6 @@ import { HeroSection } from '@/components/ui/hero-section-2';
 const Hero: React.FC = () => {
   return (
     <HeroSection
-      logo={{
-        url: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100&h=100&fit=crop&q=80",
-        alt: "ACM RVCE Logo",
-        text: "ACM RVCE"
-      }}
       title={
         <>
           Empower Your <br />

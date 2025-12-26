@@ -5,6 +5,12 @@ import Expectations from "@/components/expectations/Expectations";
 import { client } from "@/sanity/lib/client";
 import { topEventsQuery } from "@/sanity/lib/queries";
 import { faqs } from "@/lib/config/eventsFAQS";
+import DomainsBento from "@/components/landing/domains/domains-bento";
+import ProjectVelocity from "@/components/landing/projects/project-velocity";
+import ExpandableWorkflow from "@/components/landing/process/expandable-workflow";
+
+import { UpcomingEvents } from "@/components/events/upcoming-events";
+import { FAQSection } from "@/components/events/FAQSection";
 
 const Page = async () => {
   const events = await client.fetch(topEventsQuery);
@@ -12,8 +18,15 @@ const Page = async () => {
   return (
     <React.Fragment>
       <Hero />
-      <EventsAndFAQs events={events} faqs={faqs} />
+      <UpcomingEvents events={events} />
+      <DomainsBento />  
+      <ProjectVelocity />
+      <ExpandableWorkflow />
+      {/* <EventsAndFAQs events={events} faqs={faqs} /> */}
       {/* <Expectations /> */}
+      <FAQSection 
+        faqs={faqs}         
+      />
     </React.Fragment>
   );
 };

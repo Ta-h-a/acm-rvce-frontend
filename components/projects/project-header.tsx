@@ -30,7 +30,7 @@ export function ProjectHeader({
   return (
     <div className="py-12 md:py-16">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+        <h1 className="font-heading text-4xl font-bold tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-7xl mt-8">
           {title}
         </h1>
         <p className="mt-4 text-lg text-muted-foreground md:text-xl">
