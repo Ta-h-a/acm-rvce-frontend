@@ -37,9 +37,9 @@ export default function BlogPageClient({ posts }: { posts: PostsQueryResult }) {
   }, [posts, searchTerm, selectedTag]);
 
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <BlogHeader
-        title="ACM RVCE Blogs"
+        title="Blogs"
         description=""
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
