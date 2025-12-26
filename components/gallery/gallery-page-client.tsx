@@ -10,7 +10,7 @@ import ImageModal from '@/components/gallery/ImageModal'
 import type { GalleryItemsQueryResult } from '@/sanity.types'
 
 const galleryConfig = {
-  title: 'ACM RVCE GALLERY',
+  title: 'GALLERY',
   description: 'Showcasing our events and activities',
 }
 

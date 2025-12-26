@@ -37,9 +37,9 @@ export default function ProjectPageClient({ projects }: { projects: ProjectsQuer
   }, [projects, searchTerm, selectedTag]);
 
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <ProjectHeader
-        title="ACM RVCE Projects"
+        title="Projects"
         description=""
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}

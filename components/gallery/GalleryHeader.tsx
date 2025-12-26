@@ -119,7 +119,7 @@ export default function GalleryHeader({ searchQuery, onSearchChange }: GalleryHe
           as="h1"
           className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight"
         >
-          ACM RVCE Gallery
+          Gallery
         </TextEffect>
 
         <motion.p
