@@ -45,14 +45,14 @@ const ContactHero: React.FC<ContactHeroProps> = ({
   };
 
   const socialLinks = [
-    { icon: Mail, href: "mailto:contact@acmrvce.in", label: "Email" },
+    { icon: Mail, href: "mailto:acm@rvce.edu.in", label: "Email" },
     { icon: Github, href: "https://github.com/acm-rvce", label: "GitHub" },
     {
       icon: Linkedin,
-      href: "https://linkedin.com/company/acm-rvce",
+      href: "https://www.linkedin.com/company/acm-rvce-student-chapter",
       label: "LinkedIn",
     },
-    { icon: Twitter, href: "https://twitter.com/acm_rvce", label: "Twitter" },
+    { icon: Twitter, href: "https://x.com/acmrvce", label: "Twitter" },
   ];
 
   return (
@@ -118,7 +118,7 @@ const ContactHero: React.FC<ContactHeroProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={link.label}
-                className="p-3 bg-white/50 dark:bg-black-800/50 border border-black-200 dark:border-black-800 rounded-full text-black-600 dark:text-black-300 hover:bg-white dark:hover:bg-black-800 hover:text-blue-600 dark:hover:text-white transition-all duration-300"
+                className="p-3 bg-white/50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 rounded-full text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white transition-all duration-300"
               >
                 <link.icon className="w-5 h-5" />
               </a>
@@ -128,28 +128,28 @@ const ContactHero: React.FC<ContactHeroProps> = ({
 
         {/* Scroll Down Indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-3"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.8 }}
         >
-          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">
-            Scroll down to get in touch
-          </p>
           <motion.div
-            className="w-6 h-10 rounded-full border-2 border-blue-600 dark:border-blue-400 flex items-start justify-center p-2"
             animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
           >
-            <motion.div
-              className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.5,
-                ease: "easeInOut",
-              }}
-            />
+            <svg
+              className="w-6 h-6 text-neutral-600 dark:text-neutral-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
           </motion.div>
         </motion.div>
 

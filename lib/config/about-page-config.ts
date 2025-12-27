@@ -29,7 +29,7 @@ export const acmSectionConfig = {
   title: "About ACM",
   heading: "About ACM RVCE",
   image: {
-    src: "/about/core-team.jpeg",
+    src: "/about/about-acm-image-4.jpg",
     alt: "ACM RVCE",
   },
   descriptionParagraphs: [

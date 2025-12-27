@@ -135,12 +135,9 @@ export default function AboutACM() {
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
 
             {/* Label overlay - Responsive */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8 bg-gradient-to-t from-neutral-900/90 via-neutral-900/60 to-transparent backdrop-blur-sm">
+            {/* <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8 bg-gradient-to-t from-neutral-900/90 via-neutral-900/60 to-transparent backdrop-blur-sm">
               <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-0">
                 <div>
-                  <p className="text-[8px] sm:text-[10px] font-tech uppercase tracking-widest text-neutral-400 mb-1 md:mb-2">
-                    Our Core Team
-                  </p>
                   <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white">
                     Leaders & Innovators
                   </h3>
@@ -156,7 +153,7 @@ export default function AboutACM() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </motion.div>
 
