@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { motion, LayoutGroup } from "framer-motion";
+import { createPortal } from "react-dom"; // Import Portal
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useTheme } from "next-themes";
 import { Menu, X, Sun, Moon } from "lucide-react";
-import TransitionLink from "./transition-link";
 
 // --- Configuration ---
 const headerConfig = {
@@ -40,10 +40,9 @@ const HeaderFonts = () => (
   `}} />
 );
 
-// --- THEME ANIMATION LOGIC (From Skiper26 Reference) ---
-
+// --- THEME ANIMATION LOGIC ---
 export type AnimationVariant = "circle" | "rectangle" | "gif" | "polygon" | "circle-blur";
-export type AnimationStart = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "top-center" | "bottom-center" | "bottom-up" | "top-down" | "left-right" | "right-left";
+export type AnimationStart = "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center" | "top-center" | "bottom-center";
 
 interface Animation {
   name: string;
@@ -58,12 +57,7 @@ const getPositionCoords = (position: AnimationStart) => {
     case "bottom-right": return { cx: "40", cy: "40" };
     case "top-center": return { cx: "20", cy: "0" };
     case "bottom-center": return { cx: "20", cy: "40" };
-    // For directional positions, default to center (these are used for rectangle variant)
-    case "bottom-up":
-    case "top-down":
-    case "left-right":
-    case "right-left": return { cx: "20", cy: "20" };
-    default: return { cx: "0", cy: "0" };
+    default: return { cx: "20", cy: "20" };
   }
 };
 
@@ -73,205 +67,85 @@ const generateSVG = (variant: AnimationVariant, start: AnimationStart) => {
       return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="20" cy="20" r="18" fill="white" filter="url(%23blur)"/></svg>`;
     }
     const positionCoords = getPositionCoords(start);
-    if (!positionCoords) {
-        // Fallback if undefined
-        return ""; 
-    }
     const { cx, cy } = positionCoords;
     return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="${cx}" cy="${cy}" r="18" fill="white" filter="url(%23blur)"/></svg>`;
   }
-
-  if (start === "center") return;
+  if (start === "center") return "";
   if (variant === "rectangle") return "";
-
-  const positionCoords = getPositionCoords(start);
-  if (!positionCoords) return "";
-  const { cx, cy } = positionCoords;
-
+  const { cx, cy } = getPositionCoords(start);
   if (variant === "circle") {
     return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="${cx}" cy="${cy}" r="20" fill="white"/></svg>`;
   }
-
   return "";
 };
 
 const getTransformOrigin = (start: AnimationStart) => {
-  switch (start) {
-    case "top-left": return "top left";
-    case "top-right": return "top right";
-    case "bottom-left": return "bottom left";
-    case "bottom-right": return "bottom right";
-    case "top-center": return "top center";
-    case "bottom-center": return "bottom center";
-    case "bottom-up":
-    case "top-down":
-    case "left-right":
-    case "right-left": return "center";
-    default: return "center";
-  }
+    if (start.includes('top')) return start.replace('-', ' ');
+    if (start.includes('bottom')) return start.replace('-', ' ');
+    return 'center';
 };
 
 export const createAnimation = (variant: AnimationVariant, start: AnimationStart = "center", blur = false, url?: string): Animation => {
   const svg = generateSVG(variant, start);
   const transformOrigin = getTransformOrigin(start);
 
-  if (variant === "rectangle") {
-    const getClipPath = (direction: AnimationStart) => {
-      switch (direction) {
-        case "bottom-up": return { from: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "top-down": return { from: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "left-right": return { from: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "right-left": return { from: "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "top-left": return { from: "polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "top-right": return { from: "polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "bottom-left": return { from: "polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        case "bottom-right": return { from: "polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-        default: return { from: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)", to: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)" };
-      }
-    };
-    const clipPath = getClipPath(start);
-    return {
-      name: `${variant}-${start}${blur ? "-blur" : ""}`,
-      css: `
-       ::view-transition-group(root) { animation-duration: 0.7s; animation-timing-function: var(--expo-out); }
-       ::view-transition-new(root) { animation-name: reveal-light-${start}${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       ::view-transition-old(root), .dark::view-transition-old(root) { animation: none; z-index: -1; }
-       .dark::view-transition-new(root) { animation-name: reveal-dark-${start}${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       @keyframes reveal-dark-${start}${blur ? "-blur" : ""} { from { clip-path: ${clipPath.from}; ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: ${clipPath.to}; ${blur ? "filter: blur(0px);" : ""} } }
-       @keyframes reveal-light-${start}${blur ? "-blur" : ""} { from { clip-path: ${clipPath.from}; ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: ${clipPath.to}; ${blur ? "filter: blur(0px);" : ""} } }
-      `,
-    };
-  }
-
-  if (variant === "circle" && start == "center") {
-    return {
-      name: `${variant}-${start}${blur ? "-blur" : ""}`,
-      css: `
-       ::view-transition-group(root) { animation-duration: 0.7s; animation-timing-function: var(--expo-out); }
-       ::view-transition-new(root) { animation-name: reveal-light${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       ::view-transition-old(root), .dark::view-transition-old(root) { animation: none; z-index: -1; }
-       .dark::view-transition-new(root) { animation-name: reveal-dark${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       @keyframes reveal-dark${blur ? "-blur" : ""} { from { clip-path: circle(0% at 50% 50%); ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: circle(100.0% at 50% 50%); ${blur ? "filter: blur(0px);" : ""} } }
-       @keyframes reveal-light${blur ? "-blur" : ""} { from { clip-path: circle(0% at 50% 50%); ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: circle(100.0% at 50% 50%); ${blur ? "filter: blur(0px);" : ""} } }
-      `,
-    };
-  }
-
   if (variant === "circle-blur") {
-    if (start === "center") {
-      return {
-        name: `${variant}-${start}`,
-        css: `
-        ::view-transition-group(root) { animation-timing-function: var(--expo-out); }
-        ::view-transition-new(root) { mask: url('${svg}') center / 0 no-repeat; mask-origin: content-box; animation: scale 1s; transform-origin: center; }
-        ::view-transition-old(root), .dark::view-transition-old(root) { animation: scale 1s; transform-origin: center; z-index: -1; }
-        @keyframes scale { to { mask-size: 350vmax; } }
-        `,
-      };
-    }
     return {
-      name: `${variant}-${start}`,
+      name: `theme-anim-${variant}-${start}`,
       css: `
-      ::view-transition-group(root) { animation-timing-function: var(--expo-out); }
-      ::view-transition-new(root) { mask: url('${svg}') ${start.replace("-", " ")} / 0 no-repeat; mask-origin: content-box; animation: scale 1s; transform-origin: ${transformOrigin}; }
-      ::view-transition-old(root), .dark::view-transition-old(root) { animation: scale 1s; transform-origin: ${transformOrigin}; z-index: -1; }
-      @keyframes scale { to { mask-size: 350vmax; } }
+      ::view-transition-group(root) { animation-duration: 0.7s; animation-timing-function: var(--expo-out); }
+      ::view-transition-new(root) { mask: url('${svg}') ${start === 'center' ? 'center' : start.replace("-", " ")} / 0 no-repeat; mask-origin: content-box; animation: scale-${start} 1s; transform-origin: ${transformOrigin}; }
+      ::view-transition-old(root), .dark::view-transition-old(root) { animation: scale-${start} 1s; transform-origin: ${transformOrigin}; z-index: -1; }
+      @keyframes scale-${start} { to { mask-size: 350vmax; } }
       `,
     };
   }
 
-  if (variant === "circle" && start !== "center") {
-    const getClipPathPosition = (position: AnimationStart) => {
-      switch (position) {
-        case "top-left": return "0% 0%";
-        case "top-right": return "100% 0%";
-        case "bottom-left": return "0% 100%";
-        case "bottom-right": return "100% 100%";
-        case "top-center": return "50% 0%";
-        case "bottom-center": return "50% 100%";
-        default: return "50% 50%";
-      }
-    };
-    const clipPosition = getClipPathPosition(start);
-    return {
-      name: `${variant}-${start}${blur ? "-blur" : ""}`,
-      css: `
-       ::view-transition-group(root) { animation-duration: 1s; animation-timing-function: var(--expo-out); }
-       ::view-transition-new(root) { animation-name: reveal-light-${start}${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       ::view-transition-old(root), .dark::view-transition-old(root) { animation: none; z-index: -1; }
-       .dark::view-transition-new(root) { animation-name: reveal-dark-${start}${blur ? "-blur" : ""}; ${blur ? "filter: blur(2px);" : ""} }
-       @keyframes reveal-dark-${start}${blur ? "-blur" : ""} { from { clip-path: circle(0% at ${clipPosition}); ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: circle(150.0% at ${clipPosition}); ${blur ? "filter: blur(0px);" : ""} } }
-       @keyframes reveal-light-${start}${blur ? "-blur" : ""} { from { clip-path: circle(0% at ${clipPosition}); ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { clip-path: circle(150.0% at ${clipPosition}); ${blur ? "filter: blur(0px);" : ""} } }
-      `,
-    };
-  }
-
+  // Fallback
   return {
-    name: `${variant}-${start}${blur ? "-blur" : ""}`,
+    name: `theme-anim-${variant}-${start}`,
     css: `
-      ::view-transition-group(root) { animation-timing-function: var(--expo-in); }
-      ::view-transition-new(root) { mask: url('${svg}') ${start.replace("-", " ")} / 0 no-repeat; mask-origin: content-box; animation: scale-${start}${blur ? "-blur" : ""} 1s; transform-origin: ${transformOrigin}; ${blur ? "filter: blur(2px);" : ""} }
-      ::view-transition-old(root), .dark::view-transition-old(root) { animation: scale-${start}${blur ? "-blur" : ""} 1s; transform-origin: ${transformOrigin}; z-index: -1; }
-      @keyframes scale-${start}${blur ? "-blur" : ""} { from { ${blur ? "filter: blur(8px);" : ""} } ${blur ? "50% { filter: blur(4px); }" : ""} to { mask-size: 2000vmax; ${blur ? "filter: blur(0px);" : ""} } }
-    `,
+      ::view-transition-group(root) { animation-duration: 0.7s; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+      ::view-transition-new(root) { mask: url('${svg}') ${start.replace("-", " ")} / 0 no-repeat; mask-origin: content-box; animation: scale-${start} 1s; transform-origin: ${transformOrigin}; }
+      ::view-transition-old(root), .dark::view-transition-old(root) { animation: scale-${start} 1s; transform-origin: ${transformOrigin}; z-index: -1; }
+      @keyframes scale-${start} { to { mask-size: 2000vmax; } }
+    `
   };
 };
 
-// --- Custom Hook: useThemeToggle (Optimistic State Update) ---
-export const useThemeToggle = ({
-  variant = "circle",
-  start = "center",
-  blur = false,
-  gifUrl = "",
-}: {
-  variant?: AnimationVariant;
-  start?: AnimationStart;
-  blur?: boolean;
-  gifUrl?: string;
-} = {}) => {
+export const useThemeToggle = ({ variant = "circle", start = "center", blur = false, gifUrl = "" }: { variant?: AnimationVariant; start?: AnimationStart; blur?: boolean; gifUrl?: string; } = {}) => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [isDark, setIsDark] = useState(false);
 
-  // Sync state after hydration/change
-  useEffect(() => {
-    setIsDark(resolvedTheme === "dark");
-  }, [resolvedTheme]);
-
-  const styleId = "theme-transition-styles";
+  useEffect(() => { setIsDark(resolvedTheme === "dark"); }, [resolvedTheme]);
 
   const updateStyles = useCallback((css: string, name: string) => {
     if (typeof window === "undefined") return;
-    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+    let styleElement = document.getElementById("theme-transition-styles") as HTMLStyleElement;
     if (!styleElement) {
       styleElement = document.createElement("style");
-      styleElement.id = styleId;
+      styleElement.id = "theme-transition-styles";
       document.head.appendChild(styleElement);
     }
     styleElement.textContent = css;
   }, []);
 
   const toggleTheme = useCallback(() => {
-    // Optimistic toggle to update UI immediately
-    setIsDark((prev) => !prev);
-
+    setIsDark(!isDark); // Optimistic UI update
+    
     const animation = createAnimation(variant, start, blur, gifUrl);
     updateStyles(animation.css, animation.name);
-
-    if (typeof window === "undefined") return;
-
-    const switchTheme = () => {
-      setTheme(theme === "light" ? "dark" : "light");
-    };
-
+    
     if (!document.startViewTransition) {
-      switchTheme();
-      return;
+        setTheme(theme === "light" ? "dark" : "light");
+        return;
     }
 
-    document.startViewTransition(switchTheme);
-  }, [theme, setTheme, variant, start, blur, gifUrl, updateStyles]);
+    document.startViewTransition(() => {
+        setTheme(theme === "light" ? "dark" : "light");
+    });
+  }, [theme, setTheme, variant, start, blur, gifUrl, updateStyles, isDark]);
 
-  // Crazy mode helpers omitted for brevity as they share logic
   return { isDark, toggleTheme };
 };
 
@@ -320,75 +194,117 @@ const socialItems = [
 interface StaggeredMenuProps {
   items: typeof headerConfig.navigationLinks;
   socialItems: typeof socialItems;
-  logoUrl: string;
-  logoText: string;
 }
 
 const StaggeredMenu: React.FC<StaggeredMenuProps> = ({ items, socialItems }) => {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false); // For Portal
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const toggleMenu = () => setOpen(!open);
 
-  // Prevent background scrolling when menu is open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  // Framer Motion Variants for Stagger
+  const menuVariants = {
+    closed: {
+      x: "100%",
+      transition: {
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 35
+      }
+    },
+    open: {
+      x: 0,
+      transition: {
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 35
+      }
+    }
+  };
+
+  const itemVariants = {
+    closed: { x: 50, opacity: 0 },
+    open: { x: 0, opacity: 1 }
+  };
 
   return (
     <>
       <button 
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors z-[101] relative"
         onClick={toggleMenu}
         aria-label="Menu"
       >
-         <Menu className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
+         <AnimatePresence mode="wait">
+            {open ? (
+                <motion.div key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }} transition={{ duration: 0.2 }}>
+                    <X className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
+                </motion.div>
+            ) : (
+                <motion.div key="menu" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} transition={{ duration: 0.2 }}>
+                    <Menu className="h-5 w-5 text-neutral-900 dark:text-neutral-100" />
+                </motion.div>
+            )}
+         </AnimatePresence>
       </button>
 
-      <div 
-        className={cn(
-            "fixed inset-0 z-[100] bg-white dark:bg-[#0a0a0a] transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]",
-            open ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <div className="flex h-full flex-col p-8 font-header">
-             <div className="flex justify-end">
-                <button 
-                    onClick={toggleMenu}
-                    className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-900 hover:scale-90 transition-transform"
-                >
-                    <X className="h-5 w-5 text-black dark:text-white" />
-                </button>
-             </div>
-             
-             <div className="flex flex-1 flex-col justify-center gap-4 px-4 overflow-y-auto">
-                {items.map((item, idx) => (
-                    <TransitionLink 
-                        key={idx} 
-                        href={item.href} 
-                        onClick={toggleMenu}
-                        className="group flex items-center gap-4 text-3xl sm:text-5xl font-bold tracking-tighter text-neutral-900 dark:text-white transition-colors hover:text-neutral-400"
-                    >
-                        <span className="text-sm font-mono text-neutral-400 dark:text-neutral-600 group-hover:text-blue-500">0{idx + 1}</span>
-                        {item.label}
-                    </TransitionLink>
-                ))}
-             </div>
+      {/* Render Portal only on client to avoid hydration mismatch */}
+      {mounted && createPortal(
+          <motion.div
+            initial="closed"
+            animate={open ? "open" : "closed"}
+            variants={menuVariants}
+            className="fixed inset-0 top-0 right-0 w-full h-[100dvh] bg-white dark:bg-[#0a0a0a] z-[100] flex flex-col p-6 overflow-hidden"
+          >
+            {/* Close Button Inside Portal */}
+            <button 
+                onClick={toggleMenu}
+                className="absolute top-5 right-6 p-2 rounded-full bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors z-50"
+                aria-label="Close menu"
+            >
+                <X className="h-6 w-6 text-neutral-900 dark:text-neutral-100" />
+            </button>
 
-             <div className="flex gap-6 px-4 pt-8 border-t border-neutral-200 dark:border-neutral-800">
-                {socialItems.map((social, idx) => (
-                    <a key={idx} href={social.link} className="text-sm font-medium uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">
-                        {social.label}
-                    </a>
-                ))}
-             </div>
-        </div>
-      </div>
+            <div className="flex h-full flex-col font-header pt-16">
+                
+                <div className="flex flex-1 flex-col justify-center gap-6 px-4 overflow-y-auto">
+                    {items.map((item, idx) => (
+                        <motion.div key={idx} variants={itemVariants}>
+                            <a 
+                                href={item.href} 
+                                onClick={toggleMenu}
+                                className="group flex items-center gap-4 text-4xl sm:text-5xl font-bold tracking-tighter text-neutral-900 dark:text-white transition-colors hover:text-neutral-500"
+                            >
+                                <span className="text-sm font-mono text-neutral-400 dark:text-neutral-600 group-hover:text-blue-500 transition-colors">0{idx + 1}</span>
+                                {item.label}
+                            </a>
+                        </motion.div>
+                    ))}
+                </div>
+
+                <motion.div variants={itemVariants} className="flex gap-6 px-4 pt-8 border-t border-neutral-200 dark:border-neutral-800">
+                    {socialItems.map((social, idx) => (
+                        <a key={idx} href={social.link} className="text-sm font-medium uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">
+                            {social.label}
+                        </a>
+                    ))}
+                </motion.div>
+            </div>
+          </motion.div>,
+          document.body
+      )}
     </>
   );
 };
@@ -399,10 +315,13 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    setPathname(window.location.pathname);
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Check if window is defined to avoid SSR issues
+    if (typeof window !== "undefined") {
+      setPathname(window.location.pathname);
+      const handleScroll = () => setIsScrolled(window.scrollY > 20);
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
   }, []);
 
   return (
@@ -418,7 +337,7 @@ export function Header() {
             )}
         >
           {/* Logo */}
-          <TransitionLink href="/" className="flex items-center gap-3 group">
+          <a href="/" className="flex items-center gap-3 group">
              <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
                 <img 
                   src={headerConfig.brand.logo} 
@@ -432,7 +351,7 @@ export function Header() {
              )}>
                 {headerConfig.brand.title}
              </span>
-          </TransitionLink>
+          </a>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:block">
@@ -442,7 +361,7 @@ export function Header() {
                   const isActive = pathname === item.href;
                   return (
                     <li key={item.href} className="relative">
-                      <TransitionLink
+                      <a
                         href={item.href}
                         onClick={() => setPathname(item.href)}
                         className={cn(
@@ -453,7 +372,7 @@ export function Header() {
                         )}
                       >
                         {item.label}
-                      </TransitionLink>
+                      </a>
                       {isActive && (
                         <motion.div
                           layoutId="nav-pill"
@@ -476,8 +395,6 @@ export function Header() {
                 <StaggeredMenu 
                     items={headerConfig.navigationLinks} 
                     socialItems={socialItems} 
-                    logoUrl={headerConfig.brand.logo} 
-                    logoText={headerConfig.brand.title} 
                 />
              </div>
           </div>
