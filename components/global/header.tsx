@@ -7,6 +7,8 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useTheme } from "next-themes";
 import { Menu, X, Sun, Moon } from "lucide-react";
+import Link from "next/link";
+import TransitionLink from "./transition-link";
 
 // --- Configuration ---
 const headerConfig = {
@@ -215,22 +217,38 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({ items, socialItems }) => 
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Framer Motion Variants for Stagger
+  // Framer Motion Variants for Menu Slide
   const menuVariants = {
     closed: {
       x: "100%",
-      transition: {
-        type: "spring" as const,
-        stiffness: 300,
+      transition: { 
+        type: "spring" as const, 
+        stiffness: 300, 
         damping: 35
       }
     },
     open: {
       x: 0,
-      transition: {
-        type: "spring" as const,
-        stiffness: 300,
+      transition: { 
+        type: "spring" as const, 
+        stiffness: 300, 
         damping: 35
+      }
+    }
+  };
+
+  // Container variants with stagger for children
+  const containerVariants = {
+    closed: {
+      transition: {
+        staggerChildren: 0.05,
+        staggerDirection: -1
+      }
+    },
+    open: {
+      transition: {
+        staggerChildren: 0.07,
+        delayChildren: 0.1
       }
     }
   };
@@ -262,11 +280,11 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({ items, socialItems }) => 
 
       {/* Render Portal only on client to avoid hydration mismatch */}
       {mounted && createPortal(
-          <motion.div
+          <motion.div 
             initial="closed"
             animate={open ? "open" : "closed"}
             variants={menuVariants}
-            className="fixed inset-0 top-0 right-0 w-full h-[100dvh] bg-white dark:bg-[#0a0a0a] z-[100] flex flex-col p-6 overflow-hidden"
+            className="fixed inset-0 top-0 right-0 w-full h-[100dvh] bg-white dark:bg-[#0a0a0a] z-[100] flex flex-col overflow-hidden"
           >
             {/* Close Button Inside Portal */}
             <button 
@@ -277,31 +295,36 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({ items, socialItems }) => 
                 <X className="h-6 w-6 text-neutral-900 dark:text-neutral-100" />
             </button>
 
-            <div className="flex h-full flex-col font-header pt-16">
+            <motion.div 
+              className="flex h-full flex-col font-header pt-20 pb-6"
+              initial="closed"
+              animate={open ? "open" : "closed"}
+              variants={containerVariants}
+            >
                 
-                <div className="flex flex-1 flex-col justify-center gap-6 px-4 overflow-y-auto">
+                <div className="flex flex-1 flex-col justify-start gap-4 px-6 overflow-y-auto overflow-x-hidden">
                     {items.map((item, idx) => (
                         <motion.div key={idx} variants={itemVariants}>
-                            <a 
+                            <TransitionLink 
                                 href={item.href} 
                                 onClick={toggleMenu}
-                                className="group flex items-center gap-4 text-4xl sm:text-5xl font-bold tracking-tighter text-neutral-900 dark:text-white transition-colors hover:text-neutral-500"
+                                className="group flex items-center gap-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-neutral-900 dark:text-white transition-colors hover:text-neutral-500"
                             >
                                 <span className="text-sm font-mono text-neutral-400 dark:text-neutral-600 group-hover:text-blue-500 transition-colors">0{idx + 1}</span>
                                 {item.label}
-                            </a>
+                            </TransitionLink>
                         </motion.div>
                     ))}
                 </div>
 
-                <motion.div variants={itemVariants} className="flex gap-6 px-4 pt-8 border-t border-neutral-200 dark:border-neutral-800">
+                <motion.div variants={itemVariants} className="flex gap-4 sm:gap-6 px-6 pt-6 mt-4 border-t border-neutral-200 dark:border-neutral-800 flex-shrink-0">
                     {socialItems.map((social, idx) => (
-                        <a key={idx} href={social.link} className="text-sm font-medium uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">
+                        <a key={idx} href={social.link} className="text-xs sm:text-sm font-medium uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">
                             {social.label}
                         </a>
                     ))}
                 </motion.div>
-            </div>
+            </motion.div>
           </motion.div>,
           document.body
       )}
@@ -315,7 +338,6 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    // Check if window is defined to avoid SSR issues
     if (typeof window !== "undefined") {
       setPathname(window.location.pathname);
       const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -337,7 +359,7 @@ export function Header() {
             )}
         >
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group">
+          <TransitionLink href="/" className="flex items-center gap-3 group">
              <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
                 <img 
                   src={headerConfig.brand.logo} 
@@ -351,7 +373,7 @@ export function Header() {
              )}>
                 {headerConfig.brand.title}
              </span>
-          </a>
+          </TransitionLink>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:block">
@@ -361,7 +383,7 @@ export function Header() {
                   const isActive = pathname === item.href;
                   return (
                     <li key={item.href} className="relative">
-                      <a
+                      <TransitionLink
                         href={item.href}
                         onClick={() => setPathname(item.href)}
                         className={cn(
@@ -372,7 +394,7 @@ export function Header() {
                         )}
                       >
                         {item.label}
-                      </a>
+                      </TransitionLink>
                       {isActive && (
                         <motion.div
                           layoutId="nav-pill"
