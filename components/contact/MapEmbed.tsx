@@ -1,46 +1,7 @@
 "use client";
 
-import React, { useRef } from "react";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import React from "react";
 import { cn } from "@/lib/utils";
-
-// Spotlight Card Component
-const SpotlightCard = ({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
-  };
-
-  const background = useMotionTemplate`
-    radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(255,255,255,0.1), transparent 80%)
-  `;
-
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      className={cn("group relative overflow-hidden rounded-xl", className)}
-    >
-      <motion.div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background }}
-      />
-      <div className="relative">{children}</div>
-    </div>
-  );
-};
 
 interface MapEmbedProps {
   embedUrl: string;
@@ -54,31 +15,39 @@ const MapEmbed: React.FC<MapEmbedProps> = ({
   className,
 }) => {
   return (
-    <SpotlightCard className={className}>
-      <motion.div
-        className="w-full rounded-xl overflow-hidden border border-neutral-200 dark:border-white/10 transition-all duration-300 hover:border-neutral-300 dark:hover:border-white/20"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.5,
-          ease: [0.43, 0.13, 0.23, 0.96] as unknown as any,
-        }}
-      >
-        <div className="w-full h-full">
-          <iframe
-            src={embedUrl}
-            title={title}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="w-full h-full"
-          />
+    <div className={cn("relative w-full overflow-hidden group", className)}>
+        {/* Tech Frame overlay */}
+        <div className="absolute inset-0 z-10 pointer-events-none rounded-2xl border border-neutral-200 dark:border-white/10" />
+        
+        {/* Map Container */}
+        <div className="w-full h-full rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+            <iframe
+                src={embedUrl}
+                title={title}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                // The filter grayscale makes it blend into the dark theme better until interaction
+                className="w-full h-full opacity-80 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out"
+            />
         </div>
-      </motion.div>
-    </SpotlightCard>
+
+        {/* Floating Label */}
+        <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-white/90 dark:bg-black/90 backdrop-blur-md rounded-full border border-neutral-200 dark:border-white/10 shadow-sm pointer-events-none">
+            <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span className="text-[10px] font-contact-tech uppercase tracking-widest font-bold text-neutral-900 dark:text-white">
+                    RVCE Campus
+                </span>
+            </div>
+        </div>
+    </div>
   );
 };
 

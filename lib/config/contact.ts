@@ -160,6 +160,7 @@ export const contactConfig: ContactConfig = {
       icon: "Instagram",
     },
   ],
+  mapEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.599340738658!2d77.49692307583591!3d12.92398338746083!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae3e468d7d493d%3A0x6e8abd2188934b12!2sR.V.%20College%20of%20Engineering!5e0!3m2!1sen!2sin!4v1712233235427!5m2!1sen!2sin",
   animationSettings: {
     staggerChildren: 0.1,
     listItemDelay: 0.2,
