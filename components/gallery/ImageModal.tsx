@@ -121,7 +121,6 @@ export default function ImageModal({
                 </span>
               </div>
             </div>
-
             {/* <div className="text-xs opacity-75 mt-6">
               Image ID: ACM-{selectedImage.id.toString().padStart(3, '0')}
             </div> */}

@@ -35,10 +35,12 @@ const IconComponent = ({
 };
 
 const Footer = ({ className, config }: FooterProps) => {
+  const developers = ["Vishal", "Taha", "Tharun", "Avinash"];
+
   return (
     <footer
       className={cn(
-        "relative w-full bg-white dark:bg-[#050505] text-neutral-900 dark:text-white font-footer border-t border-neutral-200 dark:border-white/10",
+        "relative w-full bg-white dark:bg-[#050505] text-neutral-900 dark:text-white font-footer border-t border-neutral-200 dark:border-white/10 overflow-hidden",
         className
       )}
     >
@@ -68,7 +70,6 @@ const Footer = ({ className, config }: FooterProps) => {
               building the future.
             </p>
             <a
-              href="https://forms.google.com/acm-rvce-membership"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex h-14 items-center justify-center overflow-hidden rounded-full bg-blue-600 dark:bg-white px-8 font-medium text-white dark:text-black transition-all hover:scale-105"
@@ -95,7 +96,9 @@ const Footer = ({ className, config }: FooterProps) => {
                   />
                 </div>
               ) : (
-                <div className="h-10 w-10 bg-neutral-900 dark:bg-white rounded-lg" />
+                <div className="h-10 w-10 bg-neutral-900 dark:bg-white rounded-lg flex items-center justify-center">
+                    <Icons.Command className="w-6 h-6 text-white dark:text-black" />
+                </div>
               )}
               <span className="text-xl font-bold tracking-tight uppercase font-footer-tech">
                 {config.brand.title}
@@ -106,7 +109,7 @@ const Footer = ({ className, config }: FooterProps) => {
               {config.brand.description}
             </p>
 
-            {/* Social Links - Modern Icon Style */}
+            {/* Social Links */}
             {config.socialLinks && config.socialLinks.length > 0 && (
               <div className="flex gap-4 mt-auto pt-4">
                 {config.socialLinks.map((link) => (
@@ -150,10 +153,37 @@ const Footer = ({ className, config }: FooterProps) => {
           </div>
         </div>
 
-        {/* 3. Bottom Bar */}
-        <div className="border-t border-neutral-200 dark:border-white/10 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-500 dark:text-neutral-500 font-footer-tech uppercase tracking-wider">
-          <p>{config.copyright}</p>
-          <div className="flex gap-8">
+        {/* 3. Bottom Bar with Developer Credits */}
+        <div className="border-t border-neutral-200 dark:border-white/10 py-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-neutral-500 dark:text-neutral-500 font-footer-tech uppercase tracking-wider relative z-20">
+          
+          {/* Copyright & Credits */}
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <p>{config.copyright}</p>
+            
+            {/* Divider for desktop */}
+            <div className="hidden md:block w-px h-4 bg-neutral-200 dark:bg-white/20" />
+
+            {/* Developer Credits Block */}
+            <div className="flex items-center gap-2 bg-neutral-100 dark:bg-white/5 rounded-full px-3 py-1.5 border border-neutral-200 dark:border-white/5 hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-colors">
+                <Icons.Code2 className="w-3 h-3 text-blue-600" />
+                <span className="text-[10px] text-neutral-400 dark:text-neutral-500 font-bold">devs:</span>
+                <div className="flex items-center gap-2">
+                    {developers.map((dev, i) => (
+                        <div key={dev} className="flex items-center">
+                            <span className="font-semibold text-neutral-700 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-default">
+                                {dev}
+                            </span>
+                            {i < developers.length - 1 && (
+                                <span className="ml-2 text-neutral-300 dark:text-neutral-700 opacity-50">/</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+          </div>
+
+          {/* Legal Links */}
+          {/* <div className="flex gap-8">
             <a
               href="/privacy"
               className="hover:text-neutral-900 dark:hover:text-white transition-colors"
@@ -166,21 +196,9 @@ const Footer = ({ className, config }: FooterProps) => {
             >
               Terms of Service
             </a>
-          </div>
+          </div> */}
         </div>
 
-        {/* 4. Developer Credits */}
-        <div className="border-t border-neutral-200 dark:border-white/10 py-4 text-center">
-          <p className="text-xs text-neutral-400 dark:text-neutral-500 font-footer-tech">
-            Developed by{" "}
-            <span className="text-neutral-600 dark:text-neutral-300">
-              Vishal K Bhat, Tharunkrishna M, Avinash Anish, Mohammad Taha
-              Sindoli
-            </span>
-          </p>
-        </div>
-
-        {/* Massive Watermark (Optional: Adds huge depth) */}
         <div className="absolute bottom-0 left-0 right-0 overflow-hidden pointer-events-none select-none opacity-[0.08] dark:opacity-[0.05]">
           <h1 className="text-[15vw] font-bold leading-none text-blue-600 dark:text-white text-center whitespace-nowrap translate-y-[30%]">
             ACM RVCE

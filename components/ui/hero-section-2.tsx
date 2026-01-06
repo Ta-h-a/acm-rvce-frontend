@@ -135,12 +135,12 @@ const HeroSection = ({ title, subtitle, callToAction, backgroundImage }: HeroSec
                 transition={{ delay: 0.6, duration: 0.8 }}
                 className="flex flex-wrap items-center justify-center gap-4"
             >
-                <button className="group relative h-12 px-8 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black font-bold flex items-center gap-2 overflow-hidden hover:scale-105 transition-transform shadow-lg dark:shadow-none">
+                <a href={callToAction.href} target="_blank" rel="noopener noreferrer" className="group relative h-12 px-8 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black font-bold flex items-center gap-2 overflow-hidden hover:scale-105 transition-transform shadow-lg dark:shadow-none">
                     <span className="relative z-10">{callToAction.text}</span>
                     <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     {/* Hover Fill */}
                     <div className="absolute inset-0 bg-blue-600 dark:bg-blue-50 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-                </button>
+                </a>
 
                 <button className="h-12 px-8 rounded-full border border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-sm hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-900 dark:text-white font-medium flex items-center gap-2 transition-all hover:scale-105">
                     <Play className="w-4 h-4 fill-current" />
