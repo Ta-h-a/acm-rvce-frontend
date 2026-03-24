@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
       subtitle="ACM RVCE brings you opportunities to learn, innovate, and connect with the global tech community. Join us to accelerate your growth in computing and shape the future of technology."
       callToAction={{
         text: "BECOME A MEMBER",
-        href: "/register",
+        href: "/404",
       }}
       backgroundImage="/landing/acm-landing.jpg"
       contactInfo={{

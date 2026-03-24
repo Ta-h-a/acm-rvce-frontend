@@ -21,7 +21,7 @@ export const rvceSectionConfig = {
   stats: [
     { value: "1700+", label: "Publications" },
     { value: "70", label: "Patents Filed" },
-    { value: "₹30Cr+", label: "Research Grants" },
+    // { value: "₹30Cr+", label: "Research Grants" },
   ],
 };
 

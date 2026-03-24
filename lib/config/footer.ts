@@ -26,7 +26,7 @@ export const footerConfig: FooterConfig = {
   brand: {
     title: "ACM RVCE",
     description: "Association for Computing Machinery - RVCE Student Chapter",
-    logoSrc: "/logos/acm-rvce-new-logo.png",
+    logoSrc: "/logos/acm_white_logo.jpg",
   },
   sections: [
     {

@@ -88,7 +88,7 @@ const Footer = ({ className, config }: FooterProps) => {
           <div className="md:col-span-4 flex flex-col gap-6">
             <div className="flex items-center gap-3">
               {config.brand.logoSrc ? (
-                <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white p-1">
+                <div className="relative h-10 w-10 overflow-hidden rounded-full bg-white p-1.5">
                   <img
                     src={config.brand.logoSrc}
                     alt={`${config.brand.title} Logo`}

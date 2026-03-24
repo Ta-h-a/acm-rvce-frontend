@@ -419,13 +419,13 @@ export function Header() {
         >
           {/* Logo */}
           <TransitionLink href="/" className="flex items-center gap-3 group">
-             <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1 shadow-sm">
-                <img 
-                  src={headerConfig.brand.logo} 
-                  alt={headerConfig.brand.title} 
-                  className="h-full w-full object-contain"
-                />
-             </div>
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white p-1.5 shadow-sm overflow-hidden">
+                 <img 
+                   src={headerConfig.brand.logo} 
+                   alt={headerConfig.brand.title} 
+                   className="h-full w-full object-contain"
+                 />
+              </div>
              <span className={cn(
                 "hidden sm:block text-sm font-bold tracking-tight transition-opacity duration-300 uppercase font-tech",
                 isScrolled ? "text-neutral-900 dark:text-white" : "text-neutral-900 dark:text-white mix-blend-difference" 
